@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "queue.h": "c",
+        "MAIN.C": "cpp",
+        "xlocale": "cpp"
+    }
+}
