@@ -3,6 +3,10 @@
         "stdio.h": "c",
         "queue.h": "c",
         "MAIN.C": "cpp",
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "stack": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }

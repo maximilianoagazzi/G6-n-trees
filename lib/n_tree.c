@@ -3,32 +3,47 @@
 #include "n_tree.h"
 #include "../include/queue.h"
 
-void print_depth(ntn* node, void print_elem(void* ))  //Imprime el arbol en profundidad
+void print_depth(ntn* node, void print_elem(void* , void* ctx), void* ctx)  //Imprime el arbol en profundidad
 {
     if(node == NULL) return;
 
     ntlist* aux = node->child;
-    print_elem(node->value);
-    while(aux != NULL) {
-        print_depth(aux->node, print_elem);
-        aux = aux->next;
+    print_elem(node->value, ctx);
+    if(aux != NULL) {
+        (*(int*)ctx)++;
+        while(aux != NULL) {
+            print_depth(aux->node, print_elem, ctx);
+            aux = aux->next;
+        }
+        (*(int*)ctx)--;
     }
 }
 
-void print_breath(ntn* node, void print_elem(void* ))  //Imprime el arbol en anchura
+void print_breath(ntn* node, void print_elem(void* , void* ctx), void* ctx)  //Imprime el arbol en anchura
 {
     if(node == NULL) return;
 
     queue* q = queue_new();
     enqueue(q, node);
+
+    int current_level = 0;
+    int* level_ptr = (int*)ctx;
+
     while(!queue_is_empty(q)) {
-        node = (ntn* )dequeue(q);
-        print_elem(node->value);
-        ntlist* aux = node->child;
-        while(aux != NULL) {
-            enqueue(q, aux->node);
-            aux = aux->next;
+        int level_size = queue_length(q);
+
+        for(int i=0; i<level_size; i++) {
+            node = (ntn* )dequeue(q);
+            *level_ptr = current_level;
+            print_elem(node->value, ctx);
+
+            ntlist* aux = node->child;
+            while(aux != NULL) {
+                enqueue(q, aux->node);
+                aux = aux->next;
+            }
         }
+        current_level++;
     }
     queue_free(&q, 0);
 }

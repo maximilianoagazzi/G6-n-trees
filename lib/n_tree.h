@@ -13,8 +13,8 @@ typedef struct _ntn {
     ntlist* child;
 } ntn;
 
-void print_depth(ntn* node, void (*print_elem)(void* ));
-void print_breath(ntn* node, void (*print_elem)(void* ));
+void print_depth(ntn* node, void print_elem(void* , void* ctx), void* ctx);
+void print_breath(ntn* node, void print_elem(void* , void* ctx), void* ctx);
 ntn* ntn_new(void* value);
 ntlist* ntl_new(ntn* node);
 int ntl_insert_head(ntlist** nodelist, ntlist* newnodelist);

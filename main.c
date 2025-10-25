@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "header.h"
 
 int main()
 {
+    int count = 0;
+    void* ctx = &count;
     ntn* tree1 = n_tree_new();
     printf("El arbol tree 1 por profundidad es: ");
-    print_depth(tree1, print_int);
+    print_depth(tree1, print_int, ctx);
     printf("\n\nEl arbol tree 1 por anchura es: ");
-    print_breath(tree1, print_int);
+    print_breath(tree1, print_int, ctx);
     printf("\n\n");
     //Ejercicios 1 a-b-c-d
 
@@ -36,7 +39,7 @@ int main()
     void* value = &data;
     ntn* res = search_value(tree1, value, cmp_int);
     printf("\nEl sub arbol que tiene como raiz %d es: ", data);
-    print_depth(res, print_int);
+    print_depth(res, print_int, ctx);
     printf("\n\n");
     //Ejercicio 2a
 
@@ -44,8 +47,49 @@ int main()
 	printf("La profundidad del nodo con valor %d en tree 1 es de: %d\n", data, depth);
 	//Ejercicio 2b
 
+    data = 11;
+    printf("\nEl camino hacia la raiz de tree1 desde %d es ", data);
+    print_path_to_root(tree1, value, cmp_int, print_path_int);
+    printf("\n");
+    //Ejercicio 2c
+
+    count = 0;
+    ntn* tree2 = n_tree_new_cargo();
+    printf("\nEl arbol tree2 por profundidad es: \n");
+    print_depth(tree2, print_persona, ctx);
+    //Ejercicio 3a
+
+    char* name = "Raimunda Gates";
+    printf("\nEl camino hacia la raiz de tree2 desde %s es ", name);
+    print_path_to_root(tree2, name, cmp_persona, print_path_persona);
+    printf("\n");
+    //Ejercicio 3b
+
+    list* l = lista_por_nivel(tree2, 1);
+    printf("\nLa lista de personas en el nivel 1 es: \n");
+    list_print(l, print_persona);
+    //Ejercicio 3d
+
+    ntn* tree3 = n_tree_new2();
+    //Ejercicio 4a
+
+    count = 0;
+    printf("\nEl arbol tree3 por profundidad es: \n");
+    print_depth(tree3, print_int_depth, ctx);
+    printf("\nEl arbol tree3 por anchura es: \n");
+    print_breath(tree3, print_int_breath, ctx);
+    printf("\n");
+    //Ejercicio 4b
+
     destroy_tree(&tree1, 1);
-    //Destruye el arbol
+    destroy_personas(tree2);
+    destroy_tree(&tree2, 1);
+    //Destruye los arboles
+
+    destroy_lista_personas(l);
+    list_free(&l, 1);
+    //Destruye las listas
+
     return 0;
 }
 
@@ -56,7 +100,7 @@ void* copy_elem(void* elem)  //Auxiliar
     return copy;
 }
 
-void print_int(void* data)  //Auxiliar
+void print_int(void* data, void* ctx)  //Auxiliar
 {
     printf("%d  ", *(int*)data);
 }
@@ -98,7 +142,7 @@ ntn* n_tree_new()  //Arbol de prueba 1
     add_child(child1, grandson2);
     add_child(child1, grandson3);
     add_child(child1, grandson4);
-    //Crear los nietos del primer hijo
+    //Crear los hijos del primer hijo
 
     data = 3;
     ntn* grandson5 = ntn_new(copy_elem(value));
@@ -106,7 +150,7 @@ ntn* n_tree_new()  //Arbol de prueba 1
     ntn* grandson6 = ntn_new(copy_elem(value));
     add_child(child3, grandson5);
     add_child(child3, grandson6);
-    //Crear los nietos del tercer hijo
+    //Crear los hijos del tercer hijo
 
     data = 20;
     ntn* ggson1 = ntn_new(copy_elem(value));
@@ -137,3 +181,334 @@ int same_degree(ntn* tree)  //Ejercicio 1g
     return s;
 }
 
+void print_path_to_root(ntn* root, void* value, int cmp(void* , void* ), void print(void* ))  //Ejercicio 2c
+{
+    if(root == NULL) return;
+
+    stack* s = stack_new();
+    if(s != NULL) {
+        path(root, value, s, cmp);
+        inverted_stack(s);
+        print_stack(s, print);
+        stack_free(&s, 0);
+    }
+}
+
+void path(ntn* root, void* value, stack* s, int cmp(void* , void* ))  //Ejercicio 2c
+{
+    if(root != NULL) {
+        if(cmp(root->value, value) == 0) {
+            push(s, root->value);
+        } else {
+            ntlist* l = root->child;
+            while(l != NULL && stack_is_empty(s) == 1) {
+                path(l->node, value, s, cmp);
+                l = l->next;
+            }
+            if(stack_is_empty(s) != 1) {
+                push(s, root->value);
+            }
+        }
+    }
+}
+
+void inverted_stack(stack* s)  //Ejercicio 2c
+{
+    if(s == NULL) return;
+
+    queue* q = queue_new();
+    if(q != NULL) {
+        while(!stack_is_empty(s)) {
+            enqueue(q, pop(s));
+        }
+
+        while(!queue_is_empty(q)) {
+            push(s, dequeue(q));
+        }
+    }
+    queue_free(&q, 0);
+}
+
+void print_stack(stack* s, void print(void* ))  //Ejercicio 2c
+{
+    if(s == NULL) return;
+
+    stack* aux = stack_new();
+    if(aux != NULL) {
+        void* elem;
+        while(stack_is_empty(s) != 1) {
+            elem = pop(s);
+            print(elem);
+            push(aux, elem);
+        }
+        while(stack_is_empty(aux) != 1) {
+            push(s, pop(aux));
+        }
+        stack_free(&aux, 0);
+    }
+}
+
+void print_path_int(void* elem)  //Ejercicio 2c
+{
+    if(elem == NULL) return;
+
+    printf("-->%d ", *(int*)elem);
+}
+
+ntn* n_tree_new_cargo()  //Ejercicio 3a
+{
+    persona* gerente = persona_new("Gerente", "Ariel Perez");
+    ntn* root = ntn_new(gerente);
+    //Crear al gerente
+
+    persona* jefe1 = persona_new("Director de administracion", "Antonio Emerson");
+    ntn* j1 = ntn_new(jefe1);
+    persona* jefe2 = persona_new("Director de produccion", "Josefa Lake");
+    ntn* j2 = ntn_new(jefe2);
+    persona* jefe3 = persona_new("Director comercial", "Arturo Palmer");
+    ntn* j3 = ntn_new(jefe3);
+    add_child(root, j1);
+    add_child(root, j2);
+    add_child(root, j3);
+    //Crear los directores
+
+    persona* empleado1 = persona_new("Empleado", "Andrea Heras");
+    ntn* e1 = ntn_new(empleado1);
+    persona* empleado2 = persona_new("Empleado", "Clotilde Schwarzkopf");
+    ntn* e2 = ntn_new(empleado2);
+    add_child(j1, e1);
+    add_child(j1, e2);
+    //Crear los empleados del director de administracion
+
+    persona* empleado3 = persona_new("Empleado", "Raimunda Gates");
+    ntn* e3 = ntn_new(empleado3);
+    add_child(j2, e3);
+    //Crear el empleado del director de produccion
+
+    persona* empleado4 = persona_new("Empleado", "Estibaliz Bacon");
+    ntn* e4 = ntn_new(empleado4);
+    persona* empleado5 = persona_new("Empleado", "Luis Hidalgo");
+    ntn* e5 = ntn_new(empleado5);
+    add_child(j3, e4);
+    add_child(j3, e5);
+    //Crear los empleados del director comercial
+
+    return root;
+}
+
+persona* persona_new(char* cargo, char* nombre)  //Ejercicio 3a
+{
+    persona* p = (persona*)malloc(sizeof(persona));
+
+    if(p != NULL) {
+        p->cargo = (char*)malloc(sizeof(char)*(strlen(cargo) + 1));
+        strcpy(p->cargo, cargo);
+
+        p->nombre = (char*)malloc(sizeof(char)*(strlen(nombre) + 1));
+        strcpy(p->nombre, nombre);
+    }
+
+    return p;
+}
+
+void print_persona(void* data, void* ctx) //Ejercicio 3a
+{
+    if(data == NULL) return;
+
+    persona* p = (persona*)data;
+    int depth = 0;
+    if(ctx != NULL) {
+        depth = *(int*)ctx;
+    }
+
+    for(int i=0; i<depth; i++) {
+        printf("  ");
+    }
+    printf("Cargo: %s, Nombre: %s\n", p->cargo, p->nombre);
+}
+
+void destroy_personas(ntn* root) //Ejercicio 3a
+{
+    if(root == NULL) return;
+
+    persona* p = (persona*)root->value;
+    if(p != NULL) {
+        free(p->cargo);
+        free(p->nombre);
+        p->cargo == NULL;
+        p->nombre == NULL;
+    }
+
+    ntlist* child = root->child;
+    while(child != NULL) {
+        destroy_personas(child->node);
+        child = child->next;
+    }
+}
+
+int cmp_persona(void* a, void* b)  //Ejercicio 3b
+{
+    persona* pa = (persona*)a;
+    char* pb = (char*)b;
+
+    return strcmp(pa->nombre, pb);
+}
+
+void print_path_persona(void* elem)  //Ejercicio 3b
+{
+    if(elem == NULL) return;
+
+    persona* p = (persona*)elem;
+    printf("-->%s ", p->nombre);
+}
+
+list* lista_por_nivel(ntn* tree, int nivel)  //Ejercicio 3d
+{
+    if(tree == NULL || nivel < 0) return NULL;
+    
+    list* l = list_create();
+    if(l != NULL) {
+        queue* q = queue_new();
+        enqueue(q, tree);
+        int current_level = 0;
+        while(!queue_is_empty(q) && current_level <= nivel) {
+            int level_size = queue_length(q);
+            for(int i=0; i<level_size; i++) {
+                ntn* node = (ntn*)dequeue(q);
+                if(current_level == nivel) {
+                    list_append(l, copy_elem_persona(node->value));
+                }
+
+                ntlist* aux = node->child;
+                while(aux != NULL) {
+                    enqueue(q, aux->node);
+                    aux = aux->next;
+                }
+            }
+            current_level++;
+        }
+        queue_free(&q, 0);
+    }
+
+    return l;
+}
+
+void* copy_elem_persona(void* elem)  //Ejercicio 3d
+{
+    if(elem == NULL) return NULL;
+
+    persona* p = (persona*)elem;
+    return (void*)persona_new(p->cargo, p->nombre); 
+}
+
+void list_print(list* l, void print(void* data, void* ctx)) //Ejercicio 3d
+{
+    if(l == NULL) return;
+
+    list_first(l);
+    for(int i=0; i<list_length(l); i++) {
+        void* data = list_get(l);
+        print(data, NULL);
+        list_next(l);
+    }
+}
+
+void destroy_lista_personas(list* l)  //Ejercicio 3d
+{
+    if(l == NULL) return;
+
+    list_first(l);
+    for(int i=0; i<list_length(l); i++) {
+        persona* p = (persona*)list_get(l);
+        free(p->cargo);
+        free(p->nombre);
+        p->cargo == NULL;
+        p->nombre == NULL;
+        list_next(l);
+    }
+}
+
+ntn* n_tree_new2()  //Ejercicio 4a
+{
+    int data = 10;
+    void* value = &data;
+    ntn* root = ntn_new(copy_elem(value));
+    //crear la raiz
+
+    for(int i=0; i<5; i++) {
+        data = 20 + i;
+        ntn* child = ntn_new(copy_elem(value));
+        add_child(root, child);
+    }
+    ntlist* aux = root->child;
+    //crear hijos de la raiz
+
+    ntn* child1 = aux->node;
+    for(int i=0; i<3; i++) {
+        data = 30 + i;
+        ntn* grandson123 = ntn_new(copy_elem(value));
+        add_child(child1, grandson123);
+    }
+    aux = aux->next;
+    //Crear los hijos del primer hijo
+
+    ntn* child2 = aux->node;
+    data = 33;
+    ntn* grandson4 = ntn_new(copy_elem(value));
+    add_child(child2, grandson4);
+    aux = aux->next;
+    //Crear los hijos del segundo hijo
+
+    ntn* child3 = aux->node;
+    data = 34;
+    ntn* grandson5 = ntn_new(copy_elem(value));
+    add_child(child3, grandson5);
+    aux = aux->next;
+    //Crear los hijos del tercer hijo
+
+    ntn* child5 = aux->next->node;
+    data = 35;
+    ntn* grandson6 = ntn_new(copy_elem(value));
+    add_child(child5, grandson6);
+    //Crear los hijos del quinto hijo
+
+    for(int i=0; i<7; i++) {
+        data = 40 + i;
+        ntn* ggson = ntn_new(copy_elem(value));
+        add_child(grandson5, ggson);
+    }
+    //Crear los hijos del nieto del tercer hijo
+
+    return root;
+}
+
+void print_int_depth(void* data, void* ctx)  //Ejercicio 4b
+{
+    if(data == NULL) return;
+
+    int n = *(int* )data;
+    int depth = 0;
+    if(ctx != NULL) {
+        depth = *(int*)ctx;
+    }
+
+    for(int i=0; i<depth; i++) {
+        printf("   ");
+    }
+    printf("%d\n", n);
+}
+
+void print_int_breath(void* data, void* ctx)  //Ejercicio 4b
+{
+    if(data == NULL) return;
+
+    static int last_level = -1;
+    int n = *(int* )data;
+    int depth = *(int*)ctx;
+
+    if(depth != last_level) {
+        printf("\nNivel %d:  ", depth+1);
+        last_level = depth;
+    }
+    printf("%d  ", n);
+}
