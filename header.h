@@ -33,5 +33,7 @@ void destroy_lista_personas(list* l);
 ntn* n_tree_new2();
 void print_int_depth(void* data, void* ctx);
 void print_int_breath(void* data, void* ctx);
+ntn* remove_any_value(ntn** tree, void* value, int cmp(void* , void* ));
+ntn* remove_head(ntn** tree);
 
 #endif

@@ -26,7 +26,7 @@ int cant_child(ntn* tree);
 int maxin(int a, int b);
 int tree_hight(ntn* tree);
 void destroy_tree(ntn** tree, int dinamic);
-ntn* search_value(ntn* tree, void* value, int cmp(void* a, void* b));
+ntn** search_node(ntn** tree, void* value, int cmp(void* a, void* b));
 int node_depth(ntn* root, ntn* node, int cmp(void* a, void* b));
 
 #endif

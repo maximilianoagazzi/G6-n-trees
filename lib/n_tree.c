@@ -195,20 +195,20 @@ void destroy_tree(ntn** tree, int dinamic)  //Destruye el arbol
     *tree = NULL;
 }
 
-ntn* search_value(ntn* tree, void* value, int cmp(void* a, void* b))  //Devuelve un nodo que tenga value
+ntn** search_node(ntn** tree, void* value, int cmp(void* a, void* b))  //Devuelve un puntero al nodo que tenga value
 {
-    if(tree == NULL) return NULL;
+    if(*tree == NULL) return NULL;
 
-    ntn* r = NULL;
-    if(cmp(value, tree->value) == 0) {
+    ntn** r = NULL;
+    if(cmp(value, (*tree)->value) == 0) {
         r = tree;
     } else {
-        ntlist* child = tree->child;
+        ntlist* child = (*tree)->child;
         while(child != NULL && r == NULL) {
             if(cmp(value, child->node->value) == 0) {
-                r = child->node;
+                r = &(child->node);
             } else {
-                r = search_value(child->node, value, cmp);
+                r = search_node(&(child->node), value, cmp);
             }
             child = child->next;
         }

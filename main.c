@@ -37,7 +37,7 @@ int main()
 
     int data = 10;
     void* value = &data;
-    ntn* res = search_value(tree1, value, cmp_int);
+    ntn* res = *search_node(&tree1, value, cmp_int);
     printf("\nEl sub arbol que tiene como raiz %d es: ", data);
     print_depth(res, print_int, ctx);
     printf("\n\n");
@@ -81,9 +81,18 @@ int main()
     printf("\n");
     //Ejercicio 4b
 
+    //data = 10;
+    //ntn* removed = remove_any_value(&tree3, value, cmp_int);
+    //printf("\nEl arbol tree3 luego de remover el nodo %d es: \n", data);
+    //print_breath(tree3, print_int_breath, ctx);
+    //printf("\n");
+    //Ejercicio 4c
+
     destroy_tree(&tree1, 1);
     destroy_personas(tree2);
     destroy_tree(&tree2, 1);
+    destroy_tree(&tree3, 1);
+    //destroy_tree(&removed, 1);
     //Destruye los arboles
 
     destroy_lista_personas(l);
@@ -512,3 +521,56 @@ void print_int_breath(void* data, void* ctx)  //Ejercicio 4b
     }
     printf("%d  ", n);
 }
+
+ntn* remove_any_value(ntn** tree, void* value, int cmp(void* , void* ))  //Ejercicio 4c
+{
+    if(*tree == NULL) return NULL;
+
+    ntn* r = NULL;
+    if(cmp((*tree)->value, value) == 0) {
+        r = remove_head(tree);
+    } else {
+        ntlist* child = (*tree)->child;
+        while(child != NULL && r == NULL) {
+            r = remove_any_value(&(child->node), value, cmp);
+            if(r == NULL)
+                child = child->next;
+        }
+    }
+
+    return r;
+}
+
+ntn* remove_head(ntn** tree)  //Ejercicio 4c
+{
+    if(*tree == NULL) return NULL;
+
+    ntn* r = NULL;
+    ntn* new_head = NULL;
+    ntlist* aux = NULL;
+    ntlist* insert = NULL;
+
+    r = *tree;
+    if((*tree)->child != NULL) {
+        new_head = (*tree)->child->node;
+        aux = (*tree)->child->next;
+ 
+        r->child = NULL;
+        free((*tree)->child);
+        *tree = new_head;
+
+        insert = new_head->child;
+        if(insert == NULL)
+            new_head->child = aux;
+        else {
+            while(insert->next != NULL)
+                insert = insert->next;
+            insert->next = aux;
+        }
+    } else {
+        *tree = NULL;
+    }
+
+    return r;
+}
+
