@@ -41,5 +41,11 @@ void insert_append(ntlist** l, ntlist* n);
 ntn* clone(ntn* root);
 void copy_list(ntlist* l, ntlist** newl);
 int are_equal_trees(ntn* tree1,ntn* tree2, int cmp(void* , void* ));
+void print_path_A_to_B(ntn* root, void* A, void* B, int cmp(void* , void* ), void print(void* ));
+void path_A_to_B(ntn* root, void* A, void* B, stack* s, int cmp(void* , void* ));
+int is_balanced(ntn* root);
+ntn* mirror(ntn* root);
+void copy_mirror(ntlist* l, ntlist** newl);
+int is_symetric(ntn* root, int cmp(void* , void* ));
 
 #endif

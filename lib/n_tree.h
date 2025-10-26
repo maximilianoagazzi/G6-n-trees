@@ -24,7 +24,7 @@ int cant_nodos(ntn* tree);
 int tree_degree(ntn* tree);
 int cant_child(ntn* tree);
 int maxin(int a, int b);
-int tree_hight(ntn* tree);
+int tree_height(ntn* tree);
 void destroy_tree(ntn** tree, int dinamic);
 ntn** search_node(ntn** tree, void* value, int cmp(void* a, void* b));
 int node_depth(ntn* root, ntn* node, int cmp(void* a, void* b));

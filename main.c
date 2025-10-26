@@ -31,7 +31,7 @@ int main()
     }
     //Ejercicio 1g
 
-    int hight = tree_hight(tree1);
+    int hight = tree_height(tree1);
     printf("\nLa altura de tree 1 es: %d\n", hight);
     //Ejercicio 1h
 
@@ -103,7 +103,30 @@ int main()
     }
     //Ejercicio 5
 
-    
+    int dataA = 45;
+    int dataB = 35;
+    void* elemA = &dataA;
+    void* elemB = &dataB;
+    printf("\nEl camino desde %d hasta %d en tree3 es: ", dataA, dataB);
+    print_path_A_to_B(tree3, elemA, elemB, cmp_int, print_path_int);
+    printf("\n");
+    //Ejercicio 7
+
+    int balanced = is_balanced(tree3);
+    if(balanced == 1) {
+        printf("\nEl arbol tree3 esta balanceado\n");
+    } else {
+        printf("\nEl arbol tree3 no esta balanceado\n");
+    }
+    //Ejercicio 8
+
+    int symetric = is_symetric(tree3, cmp_int);
+    if(symetric == 1) {
+        printf("\nEl arbol tree3 es simetrico\n");
+    } else {
+        printf("\nEl arbol tree3 no es simetrico\n");
+    }
+    //Ejercicio 9
 
     destroy_tree(&tree1, 1);
     destroy_personas(tree2);
@@ -692,3 +715,118 @@ int are_equal_trees(ntn* tree1,ntn* tree2, int cmp(void* , void* ))  //Ejercicio
     return equal;
 }
 
+void print_path_A_to_B(ntn* root, void* A, void* B, int cmp(void* , void* ), void print(void* ))  //Ejercicio 7
+{
+    if(root == NULL) return;
+
+    if(search_node(&root, A, cmp) == NULL || search_node(&root, B, cmp) == NULL) {
+        printf("Alguno de los nodos no se encuentra en el arbol");
+    } else {
+        stack* s = stack_new();
+        path_A_to_B(root, A, B, s, cmp_int);
+        print_stack(s, print);
+        stack_free(&s, 0);
+    }
+}
+
+void path_A_to_B(ntn* root, void* A, void* B, stack* s, int cmp(void* , void* ))  //Ejercicio 7
+{
+    if(root == NULL) return;
+
+    stack* auxA = stack_new();
+    stack* auxB = stack_new();
+    path(root, A, auxA, cmp);
+    path(root, B, auxB, cmp);
+    queue* q = queue_new();
+    void* common = NULL;
+    int inter = 0;
+
+    while(!stack_is_empty(auxA)) {
+        void* elemA = pop(auxA);
+        void* elemB;
+        if(inter == 0)
+            elemB = pop(auxB);
+
+        if(cmp(elemA, elemB) == 0) {
+            common = elemA;
+        } else {
+            if(queue_is_empty(q) == 1) {
+                enqueue(q, common);
+                push(auxB, elemB);
+                inter = 1;
+            }
+            enqueue(q, elemA);
+        }
+    }
+    while(!stack_is_empty(auxB)) {
+        push(s, pop(auxB));
+    }
+    inverted_stack(s);
+    while(!queue_is_empty(q)) {
+        push(s, dequeue(q));
+    }
+
+    stack_free(&auxA, 0);
+    stack_free(&auxB, 0);
+    queue_free(&q, 0);
+}
+
+int is_balanced(ntn* root)  //Ejercicio 8
+{
+    if(root == NULL) return 1;
+
+    int balanced = 1;
+    int min_h = 9999;
+    int max_h = -1;
+
+    ntlist* child = root->child;
+    while(child != NULL) {
+        int h = tree_height(child->node);
+        if(h < min_h) min_h = h;
+        if(h > max_h) max_h = h;
+
+        child = child->next;
+    }
+    if((max_h - min_h) > 1) {
+        balanced = 0;
+    } else {
+        child = root->child;
+        while(child != NULL && balanced == 1) {
+            balanced = is_balanced(child->node);
+            child = child->next;
+        } 
+    }
+
+    return balanced;
+}
+
+ntn* mirror(ntn* root)  //Ejercicio 9
+{
+    if(root == NULL) return NULL;
+    
+    ntn* clon = ntn_new(copy_elem(root->value));
+    copy_mirror(root->child, &(clon->child));
+
+    return clon;
+}
+
+void copy_mirror(ntlist* l, ntlist** newl)  //Ejercicio 9
+{
+    if(l == NULL) return;
+
+    ntlist* aux = ntl_new(mirror(l->node));
+    aux->next = *newl;
+    *newl = aux;
+    copy_mirror(l->next, newl);
+}
+
+int is_symetric(ntn* root, int cmp(void* , void* ))  //Ejercicio 9
+{
+    if(root == NULL) return 1;
+
+    ntn* mirror_tree = mirror(root);
+    int equal = are_equal_trees(root, mirror_tree, cmp);
+    destroy_tree(&mirror_tree, 1);
+
+    return equal;
+}

@@ -157,7 +157,7 @@ int maxin(int a, int b)  //Auxiliar
     return r;
 }
 
-int tree_hight(ntn* tree)  //Devuelve la altura del arbol
+int tree_height(ntn* tree)  //Devuelve la altura del arbol
 {
     if(tree == NULL) return -1;
 
@@ -166,7 +166,7 @@ int tree_hight(ntn* tree)  //Devuelve la altura del arbol
     if(child != NULL) {
         int aux = hight;
         while(child != NULL) {
-            aux = maxin(aux, tree_hight(child->node));
+            aux = maxin(aux, tree_height(child->node));
             child = child->next;
         }
         hight = 1 + aux;
