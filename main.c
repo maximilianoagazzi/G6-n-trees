@@ -81,18 +81,36 @@ int main()
     printf("\n");
     //Ejercicio 4b
 
-    //data = 10;
-    //ntn* removed = remove_any_value(&tree3, value, cmp_int);
-    //printf("\nEl arbol tree3 luego de remover el nodo %d es: \n", data);
-    //print_breath(tree3, print_int_breath, ctx);
-    //printf("\n");
+    data = 10;
+    ntn* removed = remove_any_value(&tree3, value, cmp_int);
+    printf("\nEl arbol tree3 luego de remover el nodo %d es: \n", data);
+    print_breath(tree3, print_int_breath, ctx);
+    printf("\n");
     //Ejercicio 4c
+
+    max_n_degree(tree3, 3);
+    printf("\nEl arbol tree3 luego de limitar su grado a 3 es: \n");
+    print_breath(tree3, print_int_breath, ctx);
+    printf("\n");
+    //Ejercicio 4d
+
+    ntn* copy = clone(tree3);
+    int equal = are_equal_trees(tree3, copy, cmp_int);
+    if(equal == 1) {
+        printf("\nEl arbol tree3 y el arbol copy son iguales\n");
+    } else {
+        printf("\nEl arbol tree3 y el arbol copy no son iguales\n");
+    }
+    //Ejercicio 5
+
+    
 
     destroy_tree(&tree1, 1);
     destroy_personas(tree2);
     destroy_tree(&tree2, 1);
     destroy_tree(&tree3, 1);
-    //destroy_tree(&removed, 1);
+    destroy_tree(&removed, 1);
+    destroy_tree(&copy, 1);
     //Destruye los arboles
 
     destroy_lista_personas(l);
@@ -572,5 +590,105 @@ ntn* remove_head(ntn** tree)  //Ejercicio 4c
     }
 
     return r;
+}
+
+void max_n_degree(ntn* tree, int n)  //Ejercicio 4d
+{
+    if(tree == NULL || n < 1) return;
+
+    ntlist* child = tree->child;
+    ntlist* removed = max_cant_list_n(child, n);
+
+    while(removed != NULL) {
+        if(child == NULL)
+            child = tree->child; 
+        
+        ntlist* aux = removed->next;
+        removed->next = NULL;  
+        insert_append(&(child->node->child), removed);
+        removed = aux;
+        child = child->next;
+    }
+
+    child = tree->child;
+    while(child != NULL) {
+        max_n_degree(child->node, n);
+        child = child->next;
+    }
+}
+
+ntlist* max_cant_list_n(ntlist* l, int n)  //Ejercicio 4d
+{
+    if(l == NULL || n < 1) return NULL;
+
+    ntlist* r = NULL;
+
+    int count = 1;
+    while(l != NULL && count < n) {
+        count++;
+        l = l->next;
+    }
+    if(l != NULL && count == n) {
+        r = l->next;
+        l->next = NULL;
+    }
+
+    return r;
+}
+
+void insert_append(ntlist** l, ntlist* n)  //Ejercicio 4d
+{
+    if(n == NULL) return;
+
+    if(*l != NULL) {
+        while((*l)->next != NULL) {
+            l = &((*l)->next);
+        }
+        (*l)->next = n;
+    } else {
+        *l = n;
+    }
+}
+
+ntn* clone(ntn* root)  //Ejercicio 5
+{
+    if(root == NULL) return NULL;
+    
+    ntn* clon = ntn_new(copy_elem(root->value));
+    copy_list(root->child, &(clon->child));
+
+    return clon;
+}
+
+void copy_list(ntlist* l, ntlist** newl)  //Ejercicio 5
+{
+    if(l == NULL) return;
+
+    ntlist* aux = ntl_new(clone(l->node));
+    copy_list(l->next, &(aux->next));
+    *newl = aux;
+}
+
+int are_equal_trees(ntn* tree1,ntn* tree2, int cmp(void* , void* ))  //Ejercicio 5
+{
+    if(tree1 == NULL && tree2 == NULL) return 1;
+    if(tree1 == NULL || tree2 == NULL) return 0;
+
+    int equal = 0;
+    if(cmp(tree1->value, tree2->value) == 0) {
+        ntlist* child1 = tree1->child;
+        ntlist* child2 = tree2->child;
+
+        if(cant_child(tree1) == cant_child(tree2)) {
+            equal = 1;
+            while(child1 != NULL && equal == 1) {
+                equal = are_equal_trees(child1->node, child2->node, cmp);
+                child1 = child1->next;
+                child2 = child2->next;
+            }
+        } 
+    }
+
+    return equal;
 }
 

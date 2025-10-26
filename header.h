@@ -35,5 +35,11 @@ void print_int_depth(void* data, void* ctx);
 void print_int_breath(void* data, void* ctx);
 ntn* remove_any_value(ntn** tree, void* value, int cmp(void* , void* ));
 ntn* remove_head(ntn** tree);
+void max_n_degree(ntn* tree, int n);
+ntlist* max_cant_list_n(ntlist* l, int n);
+void insert_append(ntlist** l, ntlist* n);
+ntn* clone(ntn* root);
+void copy_list(ntlist* l, ntlist** newl);
+int are_equal_trees(ntn* tree1,ntn* tree2, int cmp(void* , void* ));
 
 #endif
